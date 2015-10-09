@@ -1,0 +1,18 @@
+{
+  "name": "tuxedo",
+  "version": "0.0.1",
+  "main": "main.js",
+  "description": "Windows command prompt based on javascript and electron shell",
+  "dependencies": {
+    "jquery": "^2.1.4",
+    "marked": "^0.3.5",
+    "bootstrap": "^3.3.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "author": "Ken Chen",
+  "license": "MIT"
+}
