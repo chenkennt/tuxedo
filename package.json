@@ -14,5 +14,13 @@
     "start": "electron ."
   },
   "author": "Ken Chen",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chenkennt/tuxedo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chenkennt/tuxedo/issues"
+  },
+  "homepage": "https://github.com/chenkennt/tuxedo#readme"
 }
