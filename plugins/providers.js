@@ -12,22 +12,24 @@ module.exports = (function() {
   }
 
   return {
-    "file": function(env, cmd, callback, param) {
+    "file": function(env, cmd, context, param) {
       var matched = false;
+      context.beginUpdate();
       fs.readdir(env.cwd(), function(err, files) {
         if (files) {
           for (var i = 0; i < files.length; i++) {
             switch (filterFile(files[i], cmd.args[cmd.current])) {
               case 1:
-                callback(files[i]);
+                context.update(files[i]);
                 break;
               case 2:
-                callback(files[i], !matched);
+                context.update(files[i], !matched);
                 matched = true;
                 break;
             }
           }
         }
+        context.endUpdate();
       });
     }
   };

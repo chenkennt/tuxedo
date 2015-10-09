@@ -7,6 +7,7 @@ function initialize(element)
   var autoComplete = require("./auto_complete");
   var screen = ui.create(element, onAutoComplete);
   screen.appendCommandPrompt(env.commandPrompt());
+  var prevCmd = null;
 
   function onAutoComplete() {
     // clear current arg
@@ -21,16 +22,27 @@ function initialize(element)
     if (focused) screen.cursor.insert(focused);
     screen.autoCompleteWindow.hide();
   }
+  
+  function updateHint() {
+    if (!screen.autoCompleteWindow.visible()) return;
+    var cmd = commandline.parse(screen.cursor.text(), screen.cursor.index());
+    if (prevCmd === null || prevCmd.virtualCurrent == cmd.virtualCurrent) {
+      autoComplete.updateHint(env, screen.cursor.text(), screen.cursor.index(), screen.autoCompleteWindow);
+    } else {
+      screen.autoCompleteWindow.hide();
+    }
+
+    prevCmd = cmd;
+  }
 
   screen.keydown(function(c) {
     switch (c) {
       case 9: // tab
         if (!screen.autoCompleteWindow.visible()) {
           screen.autoCompleteWindow.clear();
-          autoComplete.getHint(env, screen.cursor.text(), screen.cursor.index(), function(item, focus) {
-            screen.autoCompleteWindow.add(item, focus, onAutoComplete);
-          });
           screen.autoCompleteWindow.show();
+          prevCmd = null;
+          updateHint();
         }
         break;
       case 27: // esc
@@ -42,21 +54,27 @@ function initialize(element)
         break;
       case 8: // backspace
         screen.cursor.backspace();
+        updateHint();
         break;
       case 46: // delete
         screen.cursor.del();
+        updateHint();
         break;
-      case 37: // left arrow
+      case 37: // left
         screen.cursor.left();
+        updateHint();
         break;
-      case 39: // right arrow
+      case 39: // right
         screen.cursor.right();
+        updateHint();
         break;
       case 36: // home
         screen.cursor.home();
+        updateHint();
         break;
       case 35: // end
         screen.cursor.end();
+        updateHint();
         break;
       case 38: // up
         if (screen.autoCompleteWindow.visible()) screen.autoCompleteWindow.focusPrev();
@@ -85,6 +103,7 @@ function initialize(element)
     } else {
       screen.cursor.insert(String.fromCharCode(c));
       screen.scrollToBottom();
+      updateHint();
     }
   });
 }

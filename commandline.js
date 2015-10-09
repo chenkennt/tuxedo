@@ -1,6 +1,7 @@
 module.exports = {
   parse: function(cmd, index) {
     var currentArg;
+    var virtualCurrentArg;
     var args = [];
     var argsmap = [];
     var quote = false;
@@ -11,6 +12,7 @@ module.exports = {
         case ' ': if (!quote) {
           if (start != curr) {
             if (index >= start && index <= curr) currentArg = args.length;
+            if (curr < index) virtualCurrentArg = args.length + 1;
             args.push(cmd.slice(start, curr));
             argsmap.push([start, curr]);
           }
@@ -34,7 +36,8 @@ module.exports = {
       argr: argr,
       args: args,
       argsmap: argsmap,
-      current: currentArg
+      current: currentArg,
+      virtualCurrent: currentArg || virtualCurrentArg
     };
   }
 };

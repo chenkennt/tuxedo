@@ -117,9 +117,23 @@ module.exports = (function() {
       visible: function() {
         return !autoCompleteWindow.hasClass("invisible");
       },
-      add: function(text, isFocus) {
-        var item = div().attr("title", text).addClass("tuxedo_auto_complete_item").text(text).click(itemClicked);
-        autoCompleteWindow.append(item);
+      beginUpdate: function() {
+        autoCompleteWindow.children().attr("unvisited", "1");
+      },
+      endUpdate: function() {
+        autoCompleteWindow.children("[unvisited]").remove();
+      },
+      update: function(text, isFocus, order) {
+        var curr = autoCompleteWindow.children().first();
+        while (curr.length > 0 && curr.text() < text) curr = curr.next();
+        var item;
+        if (curr.text() == text) item = curr;
+        else {
+          item = div().attr("title", text).addClass("tuxedo_auto_complete_item").text(text).click(itemClicked);
+          if (curr.length == 0) autoCompleteWindow.append(item);
+          else item.insertBefore(curr);
+        }
+        item.attr("unvisited", null);
         if (isFocus) focus(item);
       },
       focused: function() {
