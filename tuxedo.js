@@ -10,24 +10,34 @@ function initialize(element)
   var prevCmd = null;
 
   function onAutoComplete() {
-    // clear current arg
-    var index = screen.cursor.index();
-    var cmd = commandline.parse(screen.cursor.text(), index);
-    if (cmd.current !== undefined) {
-      screen.cursor.backspace(index - cmd.argsmap[cmd.current][0]);
-      screen.cursor.del(cmd.argsmap[cmd.current][1] - index);
-    }
-    // insert hint
     var focused = screen.autoCompleteWindow.focused();
-    if (focused) screen.cursor.insert(focused);
-    screen.autoCompleteWindow.hide();
+    if (focused) {
+      // clear current arg
+      var index = screen.cursor.index();
+      var cmd = commandline.parse(screen.cursor.text(), index);
+      if (cmd.current !== undefined) {
+        screen.cursor.backspace(index - cmd.argsmap[cmd.current][0]);
+        screen.cursor.del(cmd.argsmap[cmd.current][1] - index);
+      }
+      // insert hint
+      screen.cursor.insert(focused);
+      screen.autoCompleteWindow.hide();
+    }
+  }
+
+  function initAutoComplete() {
+    screen.autoCompleteWindow.clear();
+    screen.autoCompleteWindow.show();
+    prevCmd = null;
+    autoComplete.init(env, screen.autoCompleteWindow);
+    updateAutoComplete();
   }
   
-  function updateHint() {
-    if (!screen.autoCompleteWindow.visible()) return;
+  function updateAutoComplete() {
+    if (!screen.autoCompleteWindow.active()) return;
     var cmd = commandline.parse(screen.cursor.text(), screen.cursor.index());
     if (prevCmd === null || prevCmd.virtualCurrent == cmd.virtualCurrent) {
-      autoComplete.updateHint(env, screen.cursor.text(), screen.cursor.index(), screen.autoCompleteWindow);
+      autoComplete.update(screen.cursor.text(), screen.cursor.index());
     } else {
       screen.autoCompleteWindow.hide();
     }
@@ -38,43 +48,36 @@ function initialize(element)
   screen.keydown(function(c) {
     switch (c) {
       case 9: // tab
-        if (!screen.autoCompleteWindow.visible()) {
-          screen.autoCompleteWindow.clear();
-          screen.autoCompleteWindow.show();
-          prevCmd = null;
-          updateHint();
-        }
+        if (!screen.autoCompleteWindow.active()) initAutoComplete();
+        else onAutoComplete();
         break;
       case 27: // esc
-        if (screen.autoCompleteWindow.visible()) {
-          screen.autoCompleteWindow.hide();
-        } else {
-          screen.cursor.clear();
-        }
+        if (screen.autoCompleteWindow.visible()) screen.autoCompleteWindow.hide();
+        else screen.cursor.clear();
         break;
       case 8: // backspace
         screen.cursor.backspace();
-        updateHint();
+        updateAutoComplete();
         break;
       case 46: // delete
         screen.cursor.del();
-        updateHint();
+        updateAutoComplete();
         break;
       case 37: // left
         screen.cursor.left();
-        updateHint();
+        updateAutoComplete();
         break;
       case 39: // right
         screen.cursor.right();
-        updateHint();
+        updateAutoComplete();
         break;
       case 36: // home
         screen.cursor.home();
-        updateHint();
+        updateAutoComplete();
         break;
       case 35: // end
         screen.cursor.end();
-        updateHint();
+        updateAutoComplete();
         break;
       case 38: // up
         if (screen.autoCompleteWindow.visible()) screen.autoCompleteWindow.focusPrev();
@@ -103,7 +106,7 @@ function initialize(element)
     } else {
       screen.cursor.insert(String.fromCharCode(c));
       screen.scrollToBottom();
-      updateHint();
+      updateAutoComplete();
     }
   });
 }

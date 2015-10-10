@@ -85,6 +85,7 @@ module.exports = (function() {
     var clickCallback = click;
     cursor.append(autoCompleteWindow);
     var focused = null;
+    var pendingShow = false;
 
     function ensureVisible() {
       if (focused === null) return;
@@ -108,20 +109,34 @@ module.exports = (function() {
 
     return {
       show: function() {
-        autoCompleteWindow.css("top", cursor.parent().height());
-        autoCompleteWindow.removeClass("invisible");
+        // if there is no item in the list, delay showing window until there're at least two items in the window.
+        if (autoCompleteWindow.children().length > 0) {
+          autoCompleteWindow.css("top", cursor.parent().height());
+          autoCompleteWindow.removeClass("invisible");
+          pendingShow = false;
+        } else {
+          pendingShow = true;
+        }
       },
       hide: function() {
         autoCompleteWindow.addClass("invisible");
+        pendingShow = false;
       },
       visible: function() {
         return !autoCompleteWindow.hasClass("invisible");
+      },
+      active: function() {
+        return this.visible() || pendingShow;
       },
       beginUpdate: function() {
         autoCompleteWindow.children().attr("unvisited", "1");
       },
       endUpdate: function() {
+        if (autoCompleteWindow.children().length > 0 && focused === null) focus(autoCompleteWindow.children().first());
         autoCompleteWindow.children("[unvisited]").remove();
+        // if nothing is focused, focus the first item
+        if (pendingShow && autoCompleteWindow.children().length == 1 && clickCallback !== undefined) clickCallback();
+        pendingShow = false;
       },
       update: function(text, isFocus, order) {
         var curr = autoCompleteWindow.children().first();
@@ -135,6 +150,11 @@ module.exports = (function() {
         }
         item.attr("unvisited", null);
         if (isFocus) focus(item);
+        // for pending show, only show the window when there're at least two items (single item can be immediately inserted without popping up the window)
+        if (pendingShow && autoCompleteWindow.children().length == 2) {
+          this.show();
+          pendingShow = false;
+        }
       },
       focused: function() {
         if (focused !== null) return focused.text();
