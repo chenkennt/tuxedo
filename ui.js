@@ -107,11 +107,25 @@ module.exports = (function() {
       if (clickCallback !== undefined) clickCallback();
     }
 
+    function adjustWindow() {
+      // adjust window height
+      var maxHeight = 200;
+      if (autoCompleteWindow.outerHeight() > maxHeight) autoCompleteWindow.css("height", maxHeight);
+      else if (autoCompleteWindow.get(0).scrollHeight <= autoCompleteWindow.innerHeight()) autoCompleteWindow.css("height", "");
+      // adjust window location
+      var bottom = cursor.parent().offset().top + cursor.parent().outerHeight() + autoCompleteWindow.outerHeight();
+      if (bottom < window.innerHeight) autoCompleteWindow.css("top", cursor.parent().outerHeight());
+      else autoCompleteWindow.css("top", -autoCompleteWindow.outerHeight());
+      var right = cursor.offset().left + autoCompleteWindow.outerWidth();
+      if (right < window.innerWidth) autoCompleteWindow.css("left", 0);
+      // subtract 20px for scroll bar
+      else autoCompleteWindow.css("left", window.innerWidth - cursor.offset().left - autoCompleteWindow.outerWidth() - 20);
+    }
+
     return {
       show: function() {
         // if there is no item in the list, delay showing window until there're at least two items in the window.
         if (autoCompleteWindow.children().length > 0) {
-          autoCompleteWindow.css("top", cursor.parent().height());
           autoCompleteWindow.removeClass("invisible");
           pendingShow = false;
         } else {
@@ -134,6 +148,9 @@ module.exports = (function() {
       endUpdate: function() {
         if (autoCompleteWindow.children().length > 0 && focused === null) focus(autoCompleteWindow.children().first());
         autoCompleteWindow.children("[unvisited]").remove();
+        adjustWindow();
+        // hide window if no item available
+        if (autoCompleteWindow.children().length == 0) this.hide();
         // if nothing is focused, focus the first item
         if (pendingShow && autoCompleteWindow.children().length == 1 && clickCallback !== undefined) clickCallback();
         pendingShow = false;
@@ -145,7 +162,10 @@ module.exports = (function() {
         if (curr.text() == text) item = curr;
         else {
           item = div().attr("title", text).addClass("tuxedo_auto_complete_item").text(text).click(itemClicked);
-          if (curr.length == 0) autoCompleteWindow.append(item);
+          if (curr.length == 0) {
+            autoCompleteWindow.append(item);
+            adjustWindow();
+          }
           else item.insertBefore(curr);
         }
         item.attr("unvisited", null);
