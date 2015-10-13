@@ -4,9 +4,10 @@
   "main": "main.js",
   "description": "Windows command prompt based on javascript and electron shell",
   "dependencies": {
+    "bootstrap": "^3.3.5",
     "jquery": "^2.1.4",
-    "marked": "^0.3.5",
-    "bootstrap": "^3.3.5"
+    "js-yaml": "^3.4.3",
+    "marked": "^0.3.5"
   },
   "devDependencies": {},
   "scripts": {

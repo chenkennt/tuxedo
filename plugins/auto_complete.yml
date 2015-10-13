@@ -1,0 +1,51 @@
+name: git.exe
+auto_completes:
+- prefix:
+    regex: ^
+  values:
+  - add
+  - bisect
+  - branch
+  - checkout
+  - clone 
+  - commit
+  - diff
+  - fetch
+  - grep
+  - init
+  - log
+  - merge
+  - mv
+  - pull
+  - push
+  - rebase
+  - reset
+  - rm
+  - show
+  - status
+  - tag
+  case_sensitive: true
+- prefix:
+    regex: ^branch
+    case_sensitive: true
+  provider: branch
+  case_sensitive: true
+- prefix:
+    regex: ^branch
+    case_sensitive: true
+  values:
+  - --abbrev=
+  - --edit-description
+  - --no-abbrev
+  - --no-track
+  - --unset-upstream
+  - --color
+  - --list
+  - --no-color
+  - --set-upstream-to=
+  - --verbose
+  - --contains
+  - --merged
+  - --no-merged
+  - --track
+  case_sensitive: true

@@ -28,16 +28,17 @@ function initialize(element)
   function initAutoComplete() {
     screen.autoCompleteWindow.clear();
     screen.autoCompleteWindow.show();
-    prevCmd = null;
-    autoComplete.init(env, screen.autoCompleteWindow);
+    prevCmd = commandline.parse(screen.cursor.text(), screen.cursor.index());
+    autoComplete.init(prevCmd, env, screen.autoCompleteWindow);
     updateAutoComplete();
   }
-  
+
   function updateAutoComplete() {
     if (!screen.autoCompleteWindow.active()) return;
-    var cmd = commandline.parse(screen.cursor.text(), screen.cursor.index());
-    if (prevCmd === null || prevCmd.virtualCurrent == cmd.virtualCurrent) {
-      autoComplete.update(screen.cursor.text(), screen.cursor.index());
+    var index = screen.cursor.index();
+    var cmd = commandline.parse(screen.cursor.text(), index);
+    if (prevCmd.virtualCurrent == cmd.virtualCurrent) {
+      autoComplete.update(screen.cursor.text(), index);
     } else {
       screen.autoCompleteWindow.hide();
     }

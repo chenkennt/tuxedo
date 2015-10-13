@@ -1,37 +1,8 @@
 module.exports = (function() {
   var fs = require("fs");
-  function filterFile(file, filter) {
-    // return match level:
-    // 0: do not match
-    // 1: file contains filter
-    // 2: file starts with filter
-    if (filter === undefined) return 1;
-    var lowerFile = file.toLowerCase();
-    var lowerFilter = filter.toLowerCase();
-    if (lowerFile.slice(0, lowerFilter.length) == lowerFilter) return 2;
-    if (lowerFile.indexOf(lowerFilter) >= 0) return 1;
-    return 0;
-  }
-  
-  function update(files, filter, context) {
-    var matched = false;
-    context.beginUpdate();
-    for (var i = 0; i < files.length; i++) {
-      switch (filterFile(files[i], filter)) {
-        case 1:
-          context.update(files[i]);
-          break;
-        case 2:
-          context.update(files[i], !matched);
-          matched = true;
-          break;
-      }
-    }
-    context.endUpdate();
-  }
 
   return {
-    "file": function(env, context, param) {
+    "file": function(env, context, defaultUpdater, param) {
       var fileCache = {};
       return function(cmd) {
         var cwd = env.cwd();
@@ -39,12 +10,18 @@ module.exports = (function() {
           fs.readdir(cwd, function(err, files) {
             if (files) {
               fileCache[cwd] = files;
-              update(files, cmd.args[cmd.current], context);
+              defaultUpdater(files, cmd.args[cmd.current], context, false);
             }
           });
         } else {
-          update(fileCache[cwd], cmd.args[cmd.current], context);
+          defaultUpdater(fileCache[cwd], cmd.args[cmd.current], context, false);
         }
+      };
+    },
+    "branch": function(env, context, defaultUpdater, param) {
+      return function(cmd) {
+        // to be implemented later, hard code for now
+        defaultUpdater([ "master", "develop" ], cmd.args[cmd.current], context, true);
       };
     }
   };
